@@ -31,7 +31,18 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
 import com.example.iudigitalradio.ui.theme.IUDigitalRadioTheme
+
+val emisorasMap = mapOf(
+    "IU Radio FM" to "https://icecast.vrtcdn.be/mnm-high.mp3",
+    "Radio Nacional" to "https://shoutcast.radionacional.co/radionacional",
+    "La Mega Antioquia" to "https://19293.live.streamtheworld.com/LAMEGAMED_SC",
+    "Tropicana" to "https://19993.live.streamtheworld.com/TROPICANA_MED_SC",
+    "Bésame" to "https://21253.live.streamtheworld.com/BESAME_MED_SC",
+    "Emisora Estudiantil" to "https://icecast.omroep.nl/3fm-bb-mp3"
+)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +71,12 @@ fun RadioAppScreen() {
     ) {
         PerfilSection()
         Spacer(modifier = Modifier.height(24.dp))
-        ReproductorSection(emisoraActual = selectedStation)
+
+        ReproductorSection(
+            emisoraActual = selectedStation,
+            urlAudio = emisorasMap[selectedStation] ?: ""
+        )
+
         Spacer(modifier = Modifier.height(24.dp))
         ListaEmisorasSection(
             emisoraActual = selectedStation,
@@ -137,10 +153,34 @@ fun PerfilSection() {
 }
 
 @Composable
-fun ReproductorSection(emisoraActual: String) {
+fun ReproductorSection(emisoraActual: String, urlAudio: String) {
+    val context = LocalContext.current
+
+    val exoPlayer = remember { ExoPlayer.Builder(context).build() }
+
     var isPlaying by rememberSaveable { mutableStateOf(false) }
     var isMuted by rememberSaveable { mutableStateOf(false) }
-    val context = LocalContext.current
+
+    LaunchedEffect(urlAudio) {
+        if (urlAudio.isNotEmpty()) {
+            val mediaItem = MediaItem.fromUri(urlAudio)
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.prepare()
+            if (isPlaying) {
+                exoPlayer.play()
+            }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+
+    LaunchedEffect(isMuted) {
+        exoPlayer.volume = if (isMuted) 0f else 1f
+    }
 
     fun vibrarCorto() {
         val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -180,6 +220,11 @@ fun ReproductorSection(emisoraActual: String) {
             ) {
                 Button(onClick = {
                     vibrarCorto()
+                    if (isPlaying) {
+                        exoPlayer.pause()
+                    } else {
+                        exoPlayer.play()
+                    }
                     isPlaying = !isPlaying
                 }) {
                     Text(if (isPlaying) "Pause" else "Play")
@@ -197,7 +242,7 @@ fun ReproductorSection(emisoraActual: String) {
 
 @Composable
 fun ListaEmisorasSection(emisoraActual: String, onStationSelected: (String) -> Unit) {
-    val emisoras = listOf("IU Radio FM", "La Mega Antioquia", "Radio Nacional", "Tropicana", "Bésame", "Emisora Estudiantil")
+    val emisoras = emisorasMap.keys.toList()
 
     Text(text = "Estaciones Disponibles", style = MaterialTheme.typography.titleMedium)
     Spacer(modifier = Modifier.height(8.dp))
