@@ -37,11 +37,11 @@ import com.example.iudigitalradio.ui.theme.IUDigitalRadioTheme
 
 val emisorasMap = mapOf(
     "IU Radio FM" to "https://icecast.vrtcdn.be/mnm-high.mp3",
-    "Radio Nacional" to "https://shoutcast.radionacional.co/radionacional",
-    "La Mega Antioquia" to "https://19293.live.streamtheworld.com/LAMEGAMED_SC",
-    "Tropicana" to "https://19993.live.streamtheworld.com/TROPICANA_MED_SC",
-    "Bésame" to "https://21253.live.streamtheworld.com/BESAME_MED_SC",
-    "Emisora Estudiantil" to "https://icecast.omroep.nl/3fm-bb-mp3"
+    "Radio Nacional" to "http://stream.srg-ssr.ch/m/rsj/mp3_128",
+    "La Mega Antioquia" to "https://live.wpr.org/news-mp3",
+    "Tropicana" to "http://mp3.ffh.de/radioffh/hqlivestream.mp3",
+    "Bésame" to "https://icecast.omroep.nl/3fm-bb-mp3",
+    "Emisora Estudiantil" to "https://icecast.vrtcdn.be/stubru-high.mp3"
 )
 
 class MainActivity : ComponentActivity() {
